@@ -1,0 +1,60 @@
+id,type,severity,title,neo_found,source
+VB-001,ground-truth,Critical,Business Logic — Arbitrary Self-Deposit,yes,
+VB-002,ground-truth,Critical,Hardcoded JWT Secret Key,yes,
+VB-003,ground-truth,Critical,Business Logic — Dispute Reversal Double-Spend,yes,
+VB-004,ground-truth,Critical,Business Logic — Arbitrary Refund Amount in Dispute Resolution,yes,
+VB-005,ground-truth,High,Broken Access Control — Teller Bypasses Transaction Approval Limits,yes,
+VB-007,ground-truth,High,IDOR — Manager Freezes Any Account Without Branch Restriction,yes,
+VB-008,ground-truth,Medium,Unrestricted File Upload in Dispute Evidence,yes,
+VB-009,ground-truth,Medium,WebSocket Token Exposed in URL,yes,
+VB-010,ground-truth,Medium,IDOR — Unvalidated disburse_to_account_id,yes,
+VB-011,ground-truth,Medium,Business Logic — Unlimited Loan Amount,yes,
+VB-012,ground-truth,Low,No Password Complexity Requirements,yes,
+VB-013,ground-truth,Low,JWT Stored in localStorage,yes,
+VB-014,ground-truth,Low,Rate Limiting Only on Auth Endpoints,yes,
+VB-015,ground-truth,Medium,Client-Side Only Role Guards,yes,
+VB-016,ground-truth,Low,Refresh Token Endpoint Has No Rate Limiting,no,
+VB-017,ground-truth,Low,No Account Lockout After Failed Login Attempts,no,
+VB-018,ground-truth,Low,No Audit Logging for Privileged Operations,no,
+VB-019,ground-truth,Low,Server Version Disclosure,yes,
+VB-020,ground-truth,Low,Password Change Endpoint Non-Functional,yes,
+VB-021,ground-truth,Low,Missing Security Headers,yes,
+VB-022,ground-truth,Low,Truncated Transaction Reference Numbers,yes,
+VB-023,ground-truth,Low,SQL Wildcard Injection,yes,
+VB-024,ground-truth,Low,Insecure Account Number PRNG,yes,
+VB-025,ground-truth,Low,Host Header Injection Accepted,yes,
+VB-026,ground-truth,Info,HSTS Not Enabled,yes,
+VB-027,ground-truth,Info,CSP Not Implemented,yes,
+VB-034,ground-truth,Critical,Race Condition in Transfer Operations,yes,
+VB-039,ground-truth,Medium,JWT Token Reuse After Logout,yes,
+VB-046,ground-truth,Critical,Broken Access Control — Teller/Manager Operations Lack All Security Controls,yes,
+VB-047,ground-truth,High,IDOR — Cross-User Dispute Filing,yes,
+E-VB-01,additional,Critical,Teller Can Deposit and Withdraw to Own Accounts — No Self-Transaction Check,,teller.py:113,157
+E-VB-02,additional,High,Branch Manager Transfers Bypass Approval and Dual-Approval Thresholds,,transactions.py
+E-VB-03,additional,High,Bill Payment Bypasses Transaction Approval Threshold,,transactions.py
+E-VB-04,additional,High,Loan Approval Workflow Bypass — Compliance Review Skipped,,loan_applications.py
+E-VB-05,additional,High,Race Condition in Teller Deposit Creates Phantom Transactions,,teller.py
+E-VB-06,additional,High,Cleartext Transmission of Sensitive Information (No TLS/HTTPS),,deployment
+E-VB-07,additional,High,Missing Multi-Factor Authentication (all roles),,auth.py
+E-VB-08,additional,Medium,Transaction Approval Threshold Bypass via Transaction Splitting,,transactions.py
+E-VB-09,additional,Medium,Unicode Homoglyph Email Registration (Confusable Characters),,auth.py
+E-VB-10,additional,Medium,Host Header Injection in HTTP 307 Trailing-Slash Redirects (28/29 endpoints),,FastAPI router
+E-VB-11,additional,Medium,Improper Authentication — Inactive Account Access,,auth.py
+E-VB-12,additional,Medium,Insufficient Session Expiration,,auth.py
+E-VB-13,additional,Medium,Insufficient Session Management (no concurrent-session controls),,auth.py
+E-VB-14,additional,Medium,Clickjacking — Missing Frame Protection,,response headers
+E-VB-15,additional,Medium,WebSocket Cross-Site Hijacking (CSWSH) — Missing Origin Validation,,notifications_ws.py
+E-VB-16,additional,Medium,Missing Cache-Control Headers on Sensitive API Responses,,response headers
+E-VB-17,additional,Low,Currency Quote Endpoint Accepts Negative Amounts,,currency.py
+E-VB-18,additional,Low,WebSocket Authentication Token in URL Query String,,notifications_ws.py:14
+E-VB-19,additional,Low,CORS Misconfiguration — Permissive Preflight with Credentials,,main.py CORS config
+E-VB-20,additional,Low,Sensitive Data Exposure at Login Response,,auth.py
+E-VB-21,additional,Low,Verbose Error Messages Disclose Framework and Version Details,,error handler
+E-VB-22,additional,Low,Missing Cache-Control Headers (secondary path),,response headers
+E-VB-23,additional,Low,Missing Subresource Integrity (SRI) on External CDN Resource,,index.html
+E-VB-24,additional,Low,Path Traversal in Evidence Upload Filename (Stored),,disputes.py
+E-VB-25,additional,Low,CRLF Injection in Transaction Description (Stored),,transactions.py
+E-VB-26,additional,Low,Negative Amount Accepted in Currency Quote (alternate path),,currency.py
+E-VB-27,additional,Info,Server Version Disclosure (all endpoints),,Server header
+E-VB-28,additional,Info,Rate Limit Configuration Disclosure,,429 response body
+E-VB-29,additional,Info,Web Server Version Disclosure (Server header),,response headers

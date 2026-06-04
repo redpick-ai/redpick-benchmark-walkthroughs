@@ -1,0 +1,35 @@
+id,type,severity,title,neo_found,source
+CF-001,ground-truth,Critical,Missing Authorization on Admin User Management Actions,yes,
+CF-002,ground-truth,Critical,Deactivated User Retains Full Application Access,yes,
+CF-003,ground-truth,High,IDOR — Document Verification No Ownership Check,yes,
+CF-004,ground-truth,High,Password Hash Exposure via Drizzle ORM Relations,yes,
+CF-005,ground-truth,High,Missing Authorization on Adjuster Claim Actions,yes,
+CF-006,ground-truth,High,Missing Authorization on Underwriter makeDecision Action,yes,
+CF-007,ground-truth,Medium,Mass Assignment via Workflow updateData Spread,yes,
+CF-008,ground-truth,Medium,Adjuster updateStatus Bypasses Workflow Transition Validation,yes,
+CF-009,ground-truth,Medium,Batch Operations Accessible to Adjuster + Bypass Workflow Rules,yes,
+CF-010,ground-truth,Medium,Missing Authorization on Settlement Calculate Action,yes,
+CF-011,ground-truth,Medium,Missing Role Check on Triage API,yes,
+CF-012,ground-truth,Medium,Missing Role Check on Settlement/Workflow GET Endpoints,yes,
+CF-013,ground-truth,Medium,CSRF Protection Missing on API Endpoints,yes,
+CF-014,ground-truth,Medium,Unrestricted File Upload in Message Attachments,yes,
+CF-015,ground-truth,Medium,Weak Password Hashing — SHA-256 with Hardcoded Static Salt,yes,
+CF-016,ground-truth,Low,Session Cookie Missing Secure Flag,yes,
+CF-017,ground-truth,Low,Sessions Not Invalidated on Password Change,yes,
+CF-018,ground-truth,Low,No Rate Limiting on Login,yes,
+CF-019,ground-truth,Low,Unlimited Concurrent Sessions,yes,
+CF-020,ground-truth,Low,Account Enumeration via Registration Error Messages,yes,
+CF-021,ground-truth,Info,HSTS Not Enabled,yes,
+CF-022,ground-truth,Info,CSP Not Implemented,yes,
+CF-023,ground-truth,Info,Generic Email Address Disclosure,no,
+CF-024,ground-truth,Info,X-Content-Type-Options Not Implemented,no,
+E-CF-01,additional,Critical,IDOR — Cross-User Claim Action Execution via Direct Object Reference,,adjuster/claims/[id]/+page.server.ts:52,119,142,203
+E-CF-02,additional,Medium,Stored CRLF Injection in User Profile Fields,,settings/+page.server.ts,register/+page.server.ts
+E-CF-03,additional,Medium,Registration Endpoint Creates Account Despite Returning Error,,register/+page.server.ts:61-64
+E-CF-04,additional,Medium,Weak Password Policy — No Complexity Requirements Beyond Minimum Length,,register/+page.server.ts
+E-CF-05,additional,Medium,Business Logic — Claim Amount Exceeds Policy Coverage Limit,,claims/new/+page.server.ts
+E-CF-06,additional,Low,Sensitive Data Cacheable — Missing Cache-Control on HTML Responses,,response headers
+E-CF-07,additional,Low,Business Logic — File Upload Content-Type Mismatch Accepted,,/api/documents
+E-CF-08,additional,Low,External Resource Loaded Without Subresource Integrity (SRI),,Google Fonts
+E-CF-09,additional,Info,Framework and Technology Disclosure via Headers and _app/version.json,,x-sveltekit-page
+E-CF-10,additional,Info,SvelteKit Build Metadata and Environment Endpoint Disclosure,,/_app/version.json,/_app/env.js

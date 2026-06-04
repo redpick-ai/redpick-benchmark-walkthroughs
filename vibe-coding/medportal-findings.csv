@@ -1,0 +1,60 @@
+id,type,severity,title,neo_found,source
+MED-001,ground-truth,High,Password Hash Exposure Across Multiple Endpoints,yes,
+MED-002,ground-truth,High,Privilege Escalation via Mass Assignment on User Update,yes,
+MED-003,ground-truth,High,Mass Assignment Across All API Endpoints,yes,
+MED-004,ground-truth,High,IDOR — No Ownership Verification on Patient Data,yes,
+MED-005,ground-truth,High,Middleware Only Protects Dashboard Routes,yes,
+MED-006,ground-truth,Medium,Search API Exposes All Data Without Role Restriction,yes,
+MED-007,ground-truth,Low,No Rate Limiting on Authentication,yes,
+MED-008,ground-truth,Low,Missing Security Headers,yes,
+MED-009,ground-truth,Low,No Session Invalidation,yes,
+MED-010,ground-truth,Low,Weak Default Password in User Creation API,yes,
+MED-011,ground-truth,Low,No Input Length Validation,yes,
+MED-012,ground-truth,Low,Negative and Extreme Numeric Values Accepted,yes,
+MED-013,ground-truth,Low,Empty Required Fields Accepted,yes,
+MED-014,ground-truth,Info,Server Version Disclosure,yes,
+MED-015,ground-truth,Info,HSTS Not Enabled,yes,
+MED-016,ground-truth,Info,CSP Not Implemented,yes,
+MED-017,ground-truth,Info,Outdated JavaScript Libraries,no,
+MED-018,ground-truth,Info,X-Content-Type-Options Not Implemented,no,
+MED-019,ground-truth,Info,Verbose Error Messages Leak Internal State,no,
+MED-033,ground-truth,High,Privilege Escalation — Nurse Creates Prescriptions,yes,
+E-MED-01,additional,Critical,Critical Mass Assignment — Patient Can Overwrite userId to Hijack Account,,patients/[id]/route.ts:29
+E-MED-02,additional,Critical,Broken Access Control — Nurse Can Create Prescriptions (Medical Safety Boundary),,prescriptions/route.ts
+E-MED-03,additional,Critical,Attack Chain Primitive — Patient Self-Modification Enables Allergy Removal,,patients/[id]/route.ts:29
+E-MED-04,additional,High,Sensitive Data Exposure — Password Hash Disclosure via GET /api/users,,users/route.ts:13
+E-MED-05,additional,High,Broken Access Control — Unauthorized Role Access to Medical Records,,medical-records/route.ts
+E-MED-06,additional,High,Mass Assignment — Medical Record Arbitrary Field Modification,,medical-records/[id]/route.ts
+E-MED-07,additional,High,Mass Assignment — Prescription Arbitrary Field Modification,,prescriptions/[id]/route.ts
+E-MED-08,additional,High,IDOR — Missing Ownership Check on DELETE /api/appointments/:id,,appointments/[id]/route.ts
+E-MED-09,additional,High,Mass Assignment — POST /api/vitals Arbitrary Field Injection,,vitals/route.ts:30
+E-MED-10,additional,High,Mass Assignment — POST /api/patients Arbitrary Field Injection,,patients/route.ts:28
+E-MED-11,additional,High,Mass Assignment — Appointment Status and Fields Modifiable by Patient,,appointments/[id]/route.ts
+E-MED-12,additional,High,IDOR — Any Patient Can Modify Any Appointment,,appointments/[id]/route.ts
+E-MED-13,additional,High,Mass Assignment — Appointment Creation with Arbitrary Status,,appointments/route.ts
+E-MED-14,additional,High,Privilege Escalation — Lab Tech Can Create Arbitrary Notifications,,notifications/route.ts
+E-MED-15,additional,High,Insecure Default Credentials in User Creation,,users/route.ts
+E-MED-16,additional,High,Broken Access Control — Patient Can Self-Modify Patient Record,,patients/[id]/route.ts
+E-MED-17,additional,High,Business Logic — Share Link Revocation Bypass,,share-links/[id]/route.ts
+E-MED-18,additional,High,Business Logic — Lab Order Workflow State Bypass,,lab-orders/[id]/route.ts
+E-MED-19,additional,High,Business Logic — Appointment Status and Date Manipulation,,appointments/route.ts
+E-MED-20,additional,High,Mass Assignment — Medical Records (alternate path),,medical-records/[id]/route.ts
+E-MED-21,additional,Medium,IDOR — Missing Ownership Check on PATCH /api/share-links/:id,,share-links/[id]/route.ts
+E-MED-22,additional,Medium,Clickjacking — Missing Anti-Framing Controls (All Pages),,response headers
+E-MED-23,additional,Medium,No Server-Side CSRF Protection — Content-Type Confusion,,request handling
+E-MED-24,additional,Medium,Broken Function Level Authorization — Doctor Accessing Admin Endpoint,,change-requests/route.ts
+E-MED-25,additional,Medium,Missing Login Rate Limiting,,auth handler
+E-MED-26,additional,Medium,Broken Access Control — Nurse Role Exceeds Authorized Scope,,multiple routes
+E-MED-27,additional,Medium,Cross-Site Request Forgery on State-Changing Endpoints,,multiple routes
+E-MED-28,additional,Medium,Data Integrity — Vitals Records Without Nurse/Doctor Attribution,,vitals/route.ts
+E-MED-29,additional,Medium,Missing Cache-Control on Sensitive API Responses,,response headers
+E-MED-30,additional,Medium,Middleware Authentication Gap — API Routes Not Covered by NextAuth,,middleware.ts:4
+E-MED-31,additional,Medium,Business Logic — Appointment Check-In Status Mass Assignment,,appointments/route.ts
+E-MED-32,additional,Medium,Business Logic — Lab Upload Technician ID Override,,lab-results/upload/route.ts
+E-MED-33,additional,Medium,Vulnerable and Outdated Component — Next.js 14.1.4 (CVE-2024-46982),,package.json
+E-MED-34,additional,Low,Session Cookie Missing Secure Flag,,auth cookie
+E-MED-35,additional,Low,Unlimited Concurrent Sessions,,session management
+E-MED-36,additional,Low,Next.js Build ID and Application Structure Disclosure,,/_next/static/
+E-MED-37,additional,Low,Business Logic — Doctor Self-Referral Allowed,,referrals/route.ts
+E-MED-38,additional,Info,User Enumeration via Login,,auth handler
+E-MED-39,additional,Info,Technology Stack Disclosure via X-Powered-By Header,,response headers
