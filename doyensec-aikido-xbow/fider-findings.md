@@ -1,6 +1,6 @@
 # Fider — full findings
 
-Pure black-box run; live browser-authenticated Google sessions for the admin and member accounts, no repository or source code. Deduplication produced 37 candidate findings; 3 low-quality near-duplicates did not pass the scoring gate, leaving **34 internally confirmed findings**, splitting **12 / 22** between key-mapped findings and extras. Against the 17-item reconstructed answer key, coverage was **11 ✓ / 5 ⚠ / 1 ✗** (the 12 key-mapped findings cover the 16 found+partial items), plus **16 validated extras** credited outside the key. Adjusted score **29.5 / 33 (89.4%)**.
+Pure black-box run; live browser-authenticated Google sessions for the admin and member accounts, no repository or source code. Deduplication produced 37 candidate findings; 3 low-quality near-duplicates did not pass the scoring gate, leaving **34 internally confirmed findings**, splitting **12 / 22** between key-mapped findings and extras. Against the 17-item reconstructed answer key, coverage was **11 ✓ / 5 ⚠ / 1 ✗** (the 12 key-mapped findings cover the 16 found+partial items), plus **16 validated extras** credited outside the key. Adjusted score **29.5 / 33 (89.4%)**. Throughout, *validated* means credited by RedPick's own scorer on internal evidence — **not** reviewed by Doyensec.
 
 Status legend: **✓ Found** (full credit) · **⚠ Partial** (half credit) · **✗ Missed**.
 
@@ -48,7 +48,7 @@ RedPick confirmed 22 findings outside the answer key; the adjusted score credits
 | Validated extra | Type | Severity |
 | --- | --- | :---: |
 | Excessive session / JWT lifetime (`auth` cookie valid 365 days) | Session management | Medium |
-| Static avatar / CSS endpoints emit `Set-Cookie` with `Cache-Control: public` (shared-cache session fixation) | Session management | Medium |
+| Static avatar / CSS endpoints emit `Set-Cookie` with `Cache-Control: public` (shared-cache session fixation — runtime-observed only; the source has a cleanup guard, so this is deployment/runtime-specific) | Session management | Medium |
 | Auth cookies served without a `SameSite` attribute | Session management | Low |
 | Production source maps expose client-side source | Information exposure | Medium |
 | Admin HTML containing user emails returned without cache-control | Information exposure | Medium |
@@ -59,5 +59,5 @@ RedPick confirmed 22 findings outside the answer key; the adjusted score credits
 | `/api/v1/posts` returns HTTP 500 on negative `limit` (unhandled DB exception, unauth) | Error handling | Low |
 | `preventIndexing` does not gate `sitemap.xml` / `robots.txt` (post-URL inventory enumerable) | Information exposure | Low |
 | Missing rate limiting on content creation | Missing rate limiting | Low |
-| Missing anti-framing controls (clickjacking) | Clickjacking | Low |
+| Missing `Content-Security-Policy: frame-ancestors` / `X-Frame-Options` (clickjacking) | Clickjacking | Low |
 | _(plus additional header / cookie hardening items)_ | Misconfiguration | Low |

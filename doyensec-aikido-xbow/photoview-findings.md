@@ -1,6 +1,6 @@
 # Photoview — full findings
 
-Pure black-box run (URL + credentials only). **28 internally confirmed findings**, splitting **8 / 20** between key-mapped findings and extras. Against the 16-item reconstructed answer key, coverage was **10 ✓ / 5 ⚠ / 1 ✗** (the 8 key-mapped findings cover the 15 found+partial items, since one finding can satisfy several key items), plus **18 validated extras** credited outside the key. Adjusted score **30.5 / 34 (89.7%)**.
+Pure black-box run (URL + credentials only). **28 internally confirmed findings**, splitting **8 / 20** between key-mapped findings and extras. Against the 16-item reconstructed answer key, coverage was **10 ✓ / 5 ⚠ / 1 ✗** (the 8 key-mapped findings cover the 15 found+partial items, since one finding can satisfy several key items), plus **18 validated extras** credited outside the key. Adjusted score **30.5 / 34 (89.7%)**. Throughout, *validated* means credited by RedPick's own scorer on internal evidence — **not** reviewed by Doyensec.
 
 Status legend: **✓ Found** (full credit) · **⚠ Partial** (half credit) · **✗ Missed**.
 
@@ -35,16 +35,16 @@ RedPick confirmed 20 findings outside the answer key; the adjusted score credits
 | --- | --- | :---: |
 | GraphQL aliases amplify `authorizeUser` brute force (≈20× attempts/request) | Access control / brute force | High |
 | Empty password accepted on password change and login | Weak password policy | High |
-| Non-admin user mints a public share for admin-owned media | Broken access control | High |
+| User mints a public share for an album they don't own (incl. admin-owned) | Broken access control | High |
 | No rate limiting on the `authorizeUser` authentication mutation | Missing rate limiting | High |
-| GraphQL endpoint accepts `multipart/form-data` — CSRF-capable mutations | CSRF | Medium |
-| SQL wildcard / `LIKE` injection in GraphQL search | SQL injection | Medium |
+| GraphQL accepts `multipart/form-data` — CSRF where cookie-based auth is used | CSRF (cookie-auth dependent) | Medium |
+| `LIKE` / wildcard filter injection in GraphQL search | Search-filter injection (not classic SQLi) | Medium |
 | Public share leaks server file paths and owner metadata | Information exposure | Medium |
 | Username enumeration via login timing oracle | User enumeration | Medium |
 | Auth token stored in non-`HttpOnly`, XSS-stealable cookie | Session management | Medium |
 | No logout / session-invalidation primitive | Session management | Medium |
-| Missing media paths trigger reverse-proxy 502 | Error handling | Medium |
-| Missing HSTS header | Transport security | Medium |
-| Weak CBC-mode TLS 1.2 cipher suites (BEAST / LUCKY13 family) | TLS configuration | Low |
-| Missing anti-clickjacking controls | Clickjacking | Low |
+| Missing media paths trigger a reverse-proxy 502 (deployment / proxy behavior) | Error handling | Medium |
+| Missing HSTS header (deployment / edge config) | Transport security | Medium |
+| Weak CBC-mode TLS 1.2 cipher suites (BEAST / LUCKY13 family; deployment / edge config) | TLS configuration | Low |
+| Missing `frame-ancestors` / `X-Frame-Options` (deployment / edge config) | Clickjacking | Low |
 | _(plus cookie-flag and security-header hardening items)_ | Misconfiguration | Low |

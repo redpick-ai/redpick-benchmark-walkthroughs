@@ -88,6 +88,24 @@ A black-box companion to Doyensec's *Aikido vs. XBOW* comparison. RedPick ran th
 
 Blog post: [55 Findings, No Source Code: RedPick on Doyensec's Aikido vs XBOW Apps](https://redpick.ai/blog/redpick-doyensec-black-box)
 
+### Escape Duck Store (agentic pentesting) — 20/20 + 88 extras
+
+RedPick on Escape's Duck Store benchmark, source-free grey-box. All 20 known vulnerabilities found (100% strict), plus 88 validated extras beyond the answer key (26 distinct classes, 12 new) — 108 extended true positives at 95.6% precision. Self-scored; not part of Escape's study.
+
+- [Full findings](duck-store/findings.md) — the 20 article-parity vulns + the 26 deduplicated extra classes
+- [Scoring methodology](duck-store/scoring-methodology.md) — strict vs extended, reconciliation, run conditions
+
+Blog post: [20/20 on Duck Store](https://redpick.ai/blog/redpick-duck-store)
+
+### Pensar Argus (black-box flag benchmark) — 57/60 raw, 60/60 patched
+
+RedPick on Pensar's Argus benchmark (60 Dockerized apps). 57/60 raw upstream captures, plus 3/3 documented runtime-blocker validations after narrow patches (60/60 patched). Reported separately, never flattened. Binary scoring: a flag is captured through the app, or not.
+
+- [Overview, challenge mix & technique chains](argus/README.md)
+- [The three runtime blockers + patch](argus/runtime-blockers.md)
+
+Blog post: [57/60 Black-Box on Pensar's Argus](https://redpick.ai/blog/redpick-argus)
+
 ---
 
 ## About this repo
