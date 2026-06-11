@@ -2,7 +2,7 @@
 
 This repository contains technical deep-dives and raw finding data from RedPick's benchmark runs. The summary results and high-level narrative live on the RedPick blog; this repo is the long-form archive for researchers, pentesters, and anyone who wants to audit the work.
 
-**Live benchmark dashboards**: [bedefended.com/benchmarks](https://bedefended.com/benchmarks)
+**Live benchmark dashboards**: [redpick.com/benchmarks](https://redpick.com/benchmarks)
 **RedPick blog**: [redpick.ai/blog](https://redpick.ai/blog)
 
 ## Index
