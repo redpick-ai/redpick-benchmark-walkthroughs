@@ -106,6 +106,16 @@ RedPick on Pensar's Argus benchmark (60 Dockerized apps). 57/60 raw upstream cap
 
 Blog post: [57/60 Black-Box on Pensar's Argus](https://redpick.ai/blog/redpick-argus)
 
+### HackTheAgent (5/5, full live CTF)
+
+RedPick on HackTheAgent, a hosted HackAIcon AI-agent CTF (an AI ticketing assistant). Full live completion under a fresh `redpick` account — 5/5 server-confirmed, black-box, no source. The five levels map to production LLM-agent failure modes: unverified policy exception, refusal-explanation leak, business-logic abuse from user-supplied text, agentic tool action from disclosed state, and a redirect-based SSRF through the URL-fetching tool. The official benchmark ledger tracks the 3-level article-parity scope; this run validates the full five.
+
+- [Overview & 5-level attack chain](hacktheagent/README.md)
+- [Methodology notes](hacktheagent/methodology-notes.md) — testing conditions, evidence layout, redaction policy, integrity hashes
+- [Prompt notes](hacktheagent/prompt-notes.md) — per-level prompt strategy (redacted of flags, endpoint, tunnel URL)
+
+Blog post: [HackTheAgent 5/5: RedPick on the HackAIcon AI-Agent CTF](https://redpick.ai/blog/redpick-hacktheagent)
+
 ---
 
 ## About this repo
